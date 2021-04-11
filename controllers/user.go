@@ -10,59 +10,59 @@ import (
 	"gorm.io/gorm"
 )
 
-type TicketRepo struct {
+type UserRepo struct {
 	Db *gorm.DB
 }
 
-type ValidateTicket struct {
-	UserID uint   `json:"userid" binding:"required"`
-	Status string `json:"status" binding:"required"`
+type ValidateUser struct {
+	Name  string `json:"name" binding:"required"`
+	Email string `json:"email" binding:"required"`
 }
 
-func NewTicket() *TicketRepo {
+func NewUser() *UserRepo {
 	db := database.InitDb()
-	db.AutoMigrate(&models.Ticket{})
-	return &TicketRepo{Db: db}
+	db.AutoMigrate(&models.User{})
+	return &UserRepo{Db: db}
 }
 
-// CreateTicket crea un ticket en la base de datos
+// CreateUser crea un usuario en la base de datos
 // valida si se enviaron los campos correctos
 // retorna un JSON con un codigo de estado 200 y el objeto creado
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
-func (repository *TicketRepo) CreateTicket(c *gin.Context) {
-	var input ValidateTicket
+func (repository *UserRepo) CreateUser(c *gin.Context) {
+	var input ValidateUser
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ticket := models.Ticket{UserID: input.UserID, Status: input.Status}
-	err1 := models.CreateTicket(repository.Db, &ticket)
+	user := models.User{Name: input.Name, Email: input.Email}
+	err1 := models.CreateUser(repository.Db, &user)
 	if err1 != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err1.Error()})
+		return
 	}
-	c.JSON(http.StatusOK, ticket)
+	c.JSON(http.StatusOK, user)
 }
 
-// GetTickets retorna los tickets almacenados en la base e datos
+// GetUsers retorna los usuarios almacenados en la base e datos
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
-func (repository *TicketRepo) GetTickets(c *gin.Context) {
-	var ticket []models.Ticket
-	err := models.GetTickets(repository.Db, &ticket)
+func (repository *UserRepo) GetUsers(c *gin.Context) {
+	var user []models.User
+	err := models.GetUsers(repository.Db, &user)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, ticket)
+	c.JSON(http.StatusOK, user)
 }
 
-// GetTicket busca y retorna un ticket especificado por su id
-// en caso de no encontrarse el ticket retorna un código de estado 404
+// GetUser busca y retorna un usuario especificado por su id
+// en caso de no encontrarse el usuario retorna un código de estado 404
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
-func (repository *TicketRepo) GetTicket(c *gin.Context) {
+func (repository *UserRepo) GetUser(c *gin.Context) {
 	id, _ := c.Params.Get("id")
-	var ticket models.Ticket
-	err := models.GetTicket(repository.Db, &ticket, id)
+	var user models.User
+	err := models.GetUser(repository.Db, &user, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -72,16 +72,16 @@ func (repository *TicketRepo) GetTicket(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, ticket)
+	c.JSON(http.StatusOK, user)
 }
 
-// UpdateTicket actualiza y retorna un ticket especificado por su id
-// en caso de no encontrarse el ticket retorna un código de estado 404
+// UpdateUser actualiza y retorna un usuario especificado por su id
+// en caso de no encontrarse el usuario retorna un código de estado 404
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
-func (repository *TicketRepo) UpdateTicket(c *gin.Context) {
-	var ticket models.Ticket
+func (repository *UserRepo) UpdateUser(c *gin.Context) {
+	var user models.User
 	id, _ := c.Params.Get("id")
-	err := models.GetTicket(repository.Db, &ticket, id)
+	err := models.GetUser(repository.Db, &user, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -91,21 +91,21 @@ func (repository *TicketRepo) UpdateTicket(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.BindJSON(&ticket)
-	err = models.UpdateTicket(repository.Db, &ticket)
+	c.BindJSON(&user)
+	err = models.UpdateUser(repository.Db, &user)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
-	c.JSON(http.StatusOK, ticket)
+	c.JSON(http.StatusOK, user)
 }
 
-// DeleteTicket elimina un ticket especificado por su id
+// DeleteUser elimina un usuario especificado por su id
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
-func (repository *TicketRepo) DeleteTicket(c *gin.Context) {
-	var ticket models.Ticket
+func (repository *UserRepo) DeleteUser(c *gin.Context) {
+	var user models.User
 	id, _ := c.Params.Get("id")
-	err := models.GetTicket(repository.Db, &ticket, id)
+	err := models.GetUser(repository.Db, &user, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -115,11 +115,10 @@ func (repository *TicketRepo) DeleteTicket(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	err = models.DeleteTicket(repository.Db, &ticket, id)
+	err = models.DeleteUser(repository.Db, &user, id)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Ticket deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
 }
