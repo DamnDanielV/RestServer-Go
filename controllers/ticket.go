@@ -29,14 +29,20 @@ func NewTicket() *TicketRepo {
 // valida si se enviaron los campos correctos
 // retorna un JSON con un codigo de estado 200 y el objeto creado
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
+// en caso de recibir parametros incorrectos retorna un código de estado 400 y un error JSON
 func (repository *TicketRepo) CreateTicket(c *gin.Context) {
 	var input ValidateTicket
+
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ticket := models.Ticket{UserID: input.UserID, Status: input.Status}
+	if (ticket.Status != "abierto") && (ticket.Status != "cerrado") {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "status must be 'abierto' o 'cerrado'"})
+		return
+	}
 	err1 := models.CreateTicket(repository.Db, &ticket)
 	if err1 != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err1.Error()})
