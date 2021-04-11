@@ -65,7 +65,7 @@ func (repository *TicketRepo) GetTicket(c *gin.Context) {
 	err := models.GetTicket(repository.Db, &ticket, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.AbortWithStatus(http.StatusNotFound)
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -84,11 +84,11 @@ func (repository *TicketRepo) UpdateTicket(c *gin.Context) {
 	err := models.GetTicket(repository.Db, &ticket, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.AbortWithStatus(http.StatusNotFound)
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.BindJSON(&ticket)
@@ -105,7 +105,18 @@ func (repository *TicketRepo) UpdateTicket(c *gin.Context) {
 func (repository *TicketRepo) DeleteTicket(c *gin.Context) {
 	var ticket models.Ticket
 	id, _ := c.Params.Get("id")
-	err := models.DeleteTicket(repository.Db, &ticket, id)
+	err := models.GetTicket(repository.Db, &ticket, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = models.DeleteTicket(repository.Db, &ticket, id)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
