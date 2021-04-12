@@ -10,8 +10,14 @@ git clone https://github.com/DamnDanielV/RestServer-Go.git
 cd RestServer-Go/
 docker-compose up
 ```
-
-
+Nota: Si el ultimo mensaje en la terminal es el siguiente:
+```bash
+db_1   | Version: '5.7.33'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server (GPL)
+```
+cancelar la ejecucion (ctrl+c) y volver a ejecutar:
+```bash
+docker-compose up
+```
 
 ## Uso
 
@@ -21,9 +27,15 @@ Comprobar la conexión al contenedor del servidor
 curl http://localhost:5000/ping
      /// respuesta: pong
 ```
-### Endpoints
+## Endpoints
 
-#### Tickets
+### Documentacion del servicio
+
+```
+https://documenter.getpostman.com/view/14046382/TzJoDKvG
+```
+
+### Tickets
 - Obtener todos los tickets de la base de datos:
 ```
 // Metodo: GET
