@@ -82,7 +82,7 @@ func (repository *TicketRepo) GetTicket(c *gin.Context) {
 }
 
 // UpdateTicket actualiza y retorna un ticket especificado por su id
-// en caso de no encontrarse el ticket retorna un código de estado 404
+// en caso de no encontrarse el ticket o el usuario retorna un código de estado 404
 // en caso de fallo retorna un código de estado 500 y el mensaje de error en formato JSON
 func (repository *TicketRepo) UpdateTicket(c *gin.Context) {
 	var ticket models.Ticket
@@ -98,9 +98,13 @@ func (repository *TicketRepo) UpdateTicket(c *gin.Context) {
 		return
 	}
 	c.BindJSON(&ticket)
+	if (ticket.Status != "abierto") && (ticket.Status != "cerrado") {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "status must be 'abierto' o 'cerrado'"})
+		return
+	}
 	err = models.UpdateTicket(repository.Db, &ticket)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "That user doesn't exists!!"})
 		return
 	}
 	c.JSON(http.StatusOK, ticket)
