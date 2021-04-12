@@ -31,9 +31,9 @@ curl http://localhost:5000/ping
 
 ### Documentacion del servicio
 
-```
-https://documenter.getpostman.com/view/14046382/TzJoDKvG
-```
+Vinculo: [documentacion](https://documenter.getpostman.com/view/14046382/TzJoDKvG)
+
+
 
 ### Tickets
 - Obtener todos los tickets de la base de datos:
