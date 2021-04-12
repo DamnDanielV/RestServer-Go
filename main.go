@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/DamnDanielV/RestServer-Go/controllers"
 	"github.com/gin-gonic/gin"
@@ -9,7 +10,9 @@ import (
 
 func main() {
 	r := setupRouter()
-	_ = r.Run(":8080")
+	port := os.Getenv("PORT")
+	r.Run(":" + port)
+
 }
 
 // setupRouter configura las rutas a sus respectivos controladores
