@@ -2,16 +2,11 @@ package database
 
 import (
 	"fmt"
+	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
-
-const DB_USERNAME = "daniel"
-const DB_PASSWORD = "password"
-const DB_NAME = "ticketsDb"
-const DB_HOST = "127.0.0.1"
-const DB_PORT = "3306"
 
 var Db *gorm.DB
 
@@ -24,7 +19,12 @@ func InitDb() *gorm.DB {
 // si se genera un error muestra el mensaje en la consola
 func connectDB() *gorm.DB {
 	var err error
-	dsn := DB_USERNAME + ":" + DB_PASSWORD + "@tcp" + "(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME + "?" + "parseTime=true&loc=Local"
+	const DB_USERNAME = "root"
+	MYSQL_ROOT_PASSWORD := os.Getenv("MYSQL_ROOT_PASSWORD")
+	MYSQL_DATABASE := os.Getenv("MYSQL_DATABASE")
+	MYSQL_HOST := os.Getenv("MYSQL_HOST")
+	MYSQL_PORT := os.Getenv("MYSQL_PORT")
+	dsn := DB_USERNAME + ":" + MYSQL_ROOT_PASSWORD + "@tcp" + "(" + MYSQL_HOST + ":" + MYSQL_PORT + ")/" + MYSQL_DATABASE + "?" + "parseTime=true&loc=Local"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
