@@ -1,6 +1,8 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 // Ticket estructura que define el modelo ticket
 // NOTA: gorm.Model otorga los campos ID, CreatedAt, UpdatedAt
@@ -45,7 +47,10 @@ func GetTicket(db *gorm.DB, Ticket *Ticket, id string) (err error) {
 
 // UpdateTicket actualiza un ticket dado su id
 func UpdateTicket(db *gorm.DB, Ticket *Ticket) (err error) {
-	db.Save(Ticket)
+	err = db.Save(Ticket).Error
+	if err != nil {
+		return err
+	}
 	db.Preload("User").Find(&Ticket)
 	return nil
 }
